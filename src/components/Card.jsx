@@ -14,9 +14,9 @@ export default function Card({ info, getimg }) {
         <p className="italic p-3 w-[90%] break-words overflow-hidden ">
           {info.description}
         </p>
-        <p className=" flex items-center gap-1">
+        <div className=" flex items-center gap-1">
           Rrate : <Stars rate={info.rate} />{" "}
-        </p>
+        </div>
       </div>
     </div>
   );

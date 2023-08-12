@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useParams } from "react-router-dom";
-import Loading from "../components/Loading";
 import Stars from "../components/Stars";
 export default function RatingPage({ getimg }) {
   const [isLoading, setIsLoading] = useState(false);
+  const formref = useRef();
   const [details, setdetails] = useState();
   const [hotel, setHotel] = useState({});
   const [food, setFood] = useState();
   const [cleanliness, setcleanliness] = useState();
   const [service, setservice] = useState();
+  const [invoice, setinvoice] = useState();
   const [price, setPrice] = useState();
+  const [error, setError] = useState("");
   const url = "http://127.0.0.1:5000";
   const { id } = useParams();
   const getone = async () => {
@@ -23,14 +25,41 @@ export default function RatingPage({ getimg }) {
   useEffect(() => {
     getone();
   }, []);
-
-  const sendData = async (e) => {
+  const validatedata = (obj) => {
+    let total = 0;
+    Object.keys(obj).forEach((key) => {
+      let field = parseFloat(obj[key]);
+      if (field <= 10 && field >= 0) {
+        total += 1;
+      } else {
+        return false;
+      }
+    });
+    if (total === 4) {
+      return true;
+    }
+  };
+  const middleware = (e) => {
     e.preventDefault();
+
+    if (
+      validatedata({ food, service, cleanliness, price }) &&
+      invoice.length == 8
+    ) {
+      sendData();
+      setError("");
+      formref.current.reset();
+    } else {
+      setError("rate must be between 0 and 10");
+    }
+  };
+  const sendData = async () => {
     const submissionData = {
       food,
       service,
       cleanliness,
       price,
+      invoice,
     };
     setIsLoading(true);
     const response = await fetch(`${url}/${id}`, {
@@ -45,11 +74,10 @@ export default function RatingPage({ getimg }) {
     setIsLoading(false);
     getone();
   };
-  if (isLoading) {
-    return <Loading />;
-  }
+
   return (
     <div>
+      <p className="text-red-500 font-bold text-2xl text-center">{error}</p>
       <h1 className="text-3xl font-blod text-center text-[#756300] capitalize italic">
         {hotel.name}
       </h1>
@@ -67,7 +95,7 @@ export default function RatingPage({ getimg }) {
           <div className=" p-1 ">
             {details && (
               <>
-                <p>your rate is : {details["your rate"]}</p>
+                <p>your rate is : {details["your rate"].toFixed(2)}</p>
                 {/* <p>global rate is : {details["current rate"]}</p> */}
               </>
             )}
@@ -81,9 +109,22 @@ export default function RatingPage({ getimg }) {
         </div>
       </div>
       <form
-        className=" p-4 mt-7 border w-[60%] mx-auto max-sm:w-[95%] rounded-lg"
-        onSubmit={sendData}
+        ref={formref}
+        className={` p-4 mt-7 border w-[60%] mx-auto max-sm:w-[95%] rounded-lg ${
+          error.length > 0 ? "border border-red-500" : ""
+        }`}
+        onSubmit={middleware}
       >
+        {/*  */}
+        <div className="inputcontainer">
+          <label className="w-[20%]">invoice number</label>
+          <input
+            type="text"
+            onChange={(e) => setinvoice(e.target.value)}
+            className="inputstyle"
+          />
+        </div>
+        {/*  */}
         <div className="inputcontainer">
           <label className="w-[20%]">Food Rate</label>
           <input
@@ -93,6 +134,7 @@ export default function RatingPage({ getimg }) {
           />
         </div>
         {/*  */}
+
         <div className="inputcontainer">
           <label className="w-[20%]">service Rate</label>
           <input

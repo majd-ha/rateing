@@ -8,6 +8,7 @@ import ErrorTest from "./components/ErrorTest";
 import HotelsLayout from "./layouts/HotelsLayout";
 import RootLayout from "./layouts/RootLayout";
 import LandingPage from "./pages/LandingPage";
+import NotFound from "./pages/NotFound";
 import RatingPage from "./pages/RatingPage";
 //ims
 import royal from "./assets/Royal.png";
@@ -37,6 +38,7 @@ function App() {
         <Route path="hotels" element={<HotelsLayout />}>
           <Route path=":id" element={<RatingPage getimg={getimg} />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Route>
     )
   );
