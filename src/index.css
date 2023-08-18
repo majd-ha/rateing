@@ -19,6 +19,6 @@
     @apply flex items-center my-3;
   }
   .inputstyle {
-    @apply border border-green-200 w-[60%] outline-none indent-2;
+    @apply border border-gray-500 w-[60%] outline-none indent-2;
   }
 }

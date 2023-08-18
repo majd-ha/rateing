@@ -14,13 +14,7 @@ import RatingPage from "./pages/RatingPage";
 import royal from "./assets/Royal.png";
 import four from "./assets/four season.png";
 import holiday from "./assets/holiday.png";
-{
-  /* <Route index element={<HomePage />} />
-<Route path="guest" element={<GuestPage />} />
 
-<Route path="signup" element={<SignUp />} />
-<Route path="*" element={<NotFound />} /> */
-}
 function App() {
   const getimg = (info) => {
     if (info.name === "Royal") {

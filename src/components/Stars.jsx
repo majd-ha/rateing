@@ -7,10 +7,8 @@ export default function Stars({ rate }) {
   stars.length = Math.ceil(rate);
   useEffect(() => {
     setIshalf(rate % 1 === 0 ? false : true);
-    console.log(rate);
   }, []);
-  console.log(stars);
-  console.log();
+
   return (
     <div className="flex gap-2  items-center">
       {stars.map((el, i) => {

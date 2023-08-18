@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import { BiMessageError } from "react-icons/bi";
+import { BsCheckCircleFill } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import Stars from "../components/Stars";
 export default function RatingPage({ getimg }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [success, setsuccess] = useState(false);
   const formref = useRef();
   const [details, setdetails] = useState();
   const [hotel, setHotel] = useState({});
@@ -12,27 +13,41 @@ export default function RatingPage({ getimg }) {
   const [service, setservice] = useState();
   const [invoice, setinvoice] = useState();
   const [price, setPrice] = useState();
-  const [error, setError] = useState("");
+  const [internalErr, setInternalerr] = useState("");
+  const [error, setError] = useState(false);
   const url = "http://127.0.0.1:5000";
   const { id } = useParams();
   const getone = async () => {
-    setIsLoading(true);
     const response = await fetch(`${url}/${id}`);
     const data = await response.json();
     setHotel(data.onehotel);
-    setIsLoading(false);
   };
   useEffect(() => {
     getone();
   }, []);
+  const resetfields = () => {
+    setFood("");
+    setPrice("");
+    setcleanliness("");
+    setinvoice("");
+    setservice("");
+  };
   const validatedata = (obj) => {
     let total = 0;
     Object.keys(obj).forEach((key) => {
-      let field = parseFloat(obj[key]);
-      if (field <= 10 && field >= 0) {
-        total += 1;
+      if (key == "price") {
+        let pricefield = parseFloat(obj["price"]);
+        if (pricefield > 10) {
+          total += 1;
+        }
       } else {
-        return false;
+        let field = parseFloat(obj[key]);
+
+        if (field <= 10 && field >= 0) {
+          total += 1;
+        } else {
+          return false;
+        }
       }
     });
     if (total === 4) {
@@ -47,10 +62,10 @@ export default function RatingPage({ getimg }) {
       invoice.length == 8
     ) {
       sendData();
-      setError("");
-      formref.current.reset();
+      setError(false);
     } else {
-      setError("rate must be between 0 and 10");
+      setError(true);
+      setsuccess(false);
     }
   };
   const sendData = async () => {
@@ -61,7 +76,7 @@ export default function RatingPage({ getimg }) {
       price,
       invoice,
     };
-    setIsLoading(true);
+
     const response = await fetch(`${url}/${id}`, {
       method: "PUT",
       headers: {
@@ -70,14 +85,47 @@ export default function RatingPage({ getimg }) {
       body: JSON.stringify(submissionData),
     });
     const data = await response.json();
-    setdetails(data);
-    setIsLoading(false);
-    getone();
+    if ("err" in data) {
+      console.log(data.err);
+      setsuccess(false);
+      setInternalerr(data.err);
+    } else {
+      setdetails(data);
+      setInternalerr("");
+      getone();
+      setsuccess(true);
+      formref.current.reset();
+      resetfields();
+    }
   };
 
   return (
     <div>
-      <p className="text-red-500 font-bold text-2xl text-center">{error}</p>
+      {error && (
+        <div className=" bg-yellow-100 text-red-500  py-2 px-5 rounded-lg w-[40%] mx-auto">
+          <p className="capitalize text-center flex gap-2 font-bold py-2">
+            {" "}
+            <BiMessageError size={"1.5rem"} />
+            there is an error , here is the instructions :
+          </p>
+          <ul className="list-disc text-xs">
+            <li>all fields must be filled</li>
+            <li>
+              food , service and cleanliness rate must be between 0 and 10
+            </li>
+            <li> invoice must be 8 char length </li>
+            <li>price must be greater than 10</li>
+          </ul>
+        </div>
+      )}
+      {success && (
+        <div className="w-[30%] mx-auto rounded-2xl flex  gap-2 bg-green-700 p-3 items-center justify-center">
+          <BsCheckCircleFill size={"1.5rem"} color="white" />
+          <p className="text-2xl text-white capitalize">
+            submitted successfully
+          </p>
+        </div>
+      )}
       <h1 className="text-3xl font-blod text-center text-[#756300] capitalize italic">
         {hotel.name}
       </h1>
@@ -111,17 +159,18 @@ export default function RatingPage({ getimg }) {
       <form
         ref={formref}
         className={` p-4 mt-7 border w-[60%] mx-auto max-sm:w-[95%] rounded-lg ${
-          error.length > 0 ? "border border-red-500" : ""
+          error ? "border border-red-500" : ""
         }`}
         onSubmit={middleware}
       >
         {/*  */}
+        <p className="text-red-500">{internalErr}</p>
         <div className="inputcontainer">
           <label className="w-[20%]">invoice number</label>
           <input
             type="text"
             onChange={(e) => setinvoice(e.target.value)}
-            className="inputstyle"
+            className={` ${internalErr ? " border-red-500" : ""} inputstyle`}
           />
         </div>
         {/*  */}

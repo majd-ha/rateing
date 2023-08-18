@@ -6,7 +6,7 @@ import Loading from "../components/Loading";
 export default function LandingPage({ getimg }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const url = "http://127.0.0.1:5000";
+  const url = "http://127.0.0.1:5000/";
   const [hotels, setHotels] = useState([]);
   useEffect(() => {
     const getdata = async () => {
